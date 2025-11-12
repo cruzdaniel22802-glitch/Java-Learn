@@ -2,47 +2,66 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class SaveUser {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
-        // Accept user input
+        // Collect user input
         System.out.print("Enter your name: ");
         String name = scanner.nextLine();
 
         System.out.print("Enter your age: ");
         int age = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+
+        System.out.print("Enter your birthday (MM/dd/yyyy): ");
+        String birthdayStr = scanner.nextLine();
+
+        System.out.print("Is the user active? (true/false): ");
+        boolean isActive = scanner.nextBoolean();
+
+        // Parse birthday
+        Date birthday = null;
+        try {
+            birthday = new SimpleDateFormat("MM/dd/yyyy").parse(birthdayStr);
+        } catch (ParseException e) {
+            System.out.println("Invalid date format. Please use MM/dd/yyyy.");
+            scanner.close();
+            return;
+        }
 
         // MySQL connection details
         String url = "jdbc:mysql://localhost:3306/user_app";
         String user = "root";
         String password = "C@ndy22802";
 
-        // SQL insert statement
-        String sql = "INSERT INTO users (name, age) VALUES (?, ?)";
+        String sql = "INSERT INTO users (name, age, birthday, isActive) VALUES (?, ?, ?, ?)";
 
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver"); // Load driver
 
-        try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            try (Connection conn = DriverManager.getConnection(url, user, password);
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            stmt.setString(1, name);
-            stmt.setInt(2, age);
-            stmt.executeUpdate();
+                stmt.setString(1, name);
+                stmt.setInt(2, age);
+                stmt.setDate(3, new java.sql.Date(birthday.getTime()));
+                stmt.setBoolean(4, isActive);
 
-            System.out.println("User data saved to MySQL successfully.");
+                stmt.executeUpdate();
+                System.out.println("User data saved to MySQL successfully.");
+            }
 
-        }catch (SQLException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             System.out.println("Database error:");
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
 
         scanner.close();
-
     }
-
 }
