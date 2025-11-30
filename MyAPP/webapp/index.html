@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+</head>
+<body>
+<h2>User Registration Form</h2>
+<form action="SaveUserServlet" method="post">
+    Name: <input type="text" name="name" required><br><br>
+    Age: <input type="number" name="age" required><br><br>
+    Birthday (MM/dd/yyyy): <input type="text" name="birthday" required><br><br>
+    Is Active:
+    <select name="isActive">
+        <option value="true">True</option>
+        <option value="false">False</option>
+    </select><br><br>
+    <input type="submit" value="Submit">
+</form>
+</body>
+</html>

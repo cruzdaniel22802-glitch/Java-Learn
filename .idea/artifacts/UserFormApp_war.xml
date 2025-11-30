@@ -1,0 +1,22 @@
+<component name="ArtifactManager">
+  <artifact name="UserFormApp:war">
+    <output-path>$PROJECT_DIR$/out/artifacts/UserFormApp_war</output-path>
+    <root id="root">
+      <element id="file-copy" path="$PROJECT_DIR$/MyAPP/webapp/index.html" />
+      <element id="directory" name="WEB-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/MyAPP/webapp/WEB-INF/web.xml" />
+        <element id="directory" name="classes">
+          <element id="directory" name="main">
+            <element id="directory" name="java">
+              <element id="file-copy" path="$PROJECT_DIR$/out/production/MyAPP/main/java/SaveUserServlet.class" />
+            </element>
+          </element>
+        </element>
+        <element id="directory" name="lib">
+          <element id="file-copy" path="$USER_HOME$/jakarta.servlet-api-6.0.0.jar" />
+          <element id="file-copy" path="$USER_HOME$/mysql-connector-j-9.5.0/mysql-connector-j-9.5.0.jar" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>
