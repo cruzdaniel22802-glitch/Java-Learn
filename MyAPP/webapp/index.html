@@ -1,20 +1,136 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>User Registration</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .form-container {
+            background: white;
+            padding: 30px;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            background: #4a90e2;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #357abd;
+        }
+
+        .error {
+            color: red;
+            font-size: 13px;
+            display: none;
+        }
+    </style>
 </head>
+
 <body>
-<h2>User Registration Form</h2>
-<form action="SaveUserServlet" method="post">
-    Name: <input type="text" name="name" required><br><br>
-    Age: <input type="number" name="age" required><br><br>
-    Birthday (MM/dd/yyyy): <input type="text" name="birthday" required><br><br>
-    Is Active:
-    <select name="isActive">
-        <option value="true">True</option>
-        <option value="false">False</option>
-    </select><br><br>
-    <input type="submit" value="Submit">
-</form>
+
+<div class="form-container">
+    <h2>User Registration</h2>
+
+    <form action="SaveUserServlet" method="post" onsubmit="return validateForm()">
+
+        <label>Name</label>
+        <input type="text" name="name" id="name" required>
+        <div class="error" id="nameError">Name is required</div>
+
+        <label>Age</label>
+        <input type="number" name="age" id="age" min="1" required>
+        <div class="error" id="ageError">Enter a valid age</div>
+
+        <label>Birthday</label>
+        <input type="text" name="birthday" id="birthday" placeholder="MM/DD/YYYY" required>
+        <div class="error" id="birthdayError">Select a date</div>
+
+        <label>Active User?</label>
+        <select name="isActive">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+        </select>
+
+        <button type="submit">Register User</button>
+    </form>
+</div>
+
+<script>
+    function validateForm() {
+
+        let valid = true;
+
+        const name = document.getElementById("name").value.trim();
+        const age = document.getElementById("age").value;
+        const birthday = document.getElementById("birthday").value;
+
+        document.getElementById("nameError").style.display = "none";
+        document.getElementById("ageError").style.display = "none";
+        document.getElementById("birthdayError").style.display = "none";
+
+        if (name === "") {
+            document.getElementById("nameError").style.display = "block";
+            valid = false;
+        }
+
+        if (age <= 0) {
+            document.getElementById("ageError").style.display = "block";
+            valid = false;
+        }
+
+        if (birthday === "") {
+            document.getElementById("birthdayError").style.display = "block";
+            valid = false;
+        }
+
+        return valid;
+    }
+</script>
+
 </body>
 </html>
