@@ -1,6 +1,5 @@
 package main.java;
 
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,25 +10,50 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-//@WebServlet("/SaveUserServlet")
 public class SaveUserServlet extends HttpServlet {
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        String name = request.getParameter("name");
-        int age = Integer.parseInt(request.getParameter("age"));
-        String birthdayStr = request.getParameter("birthday");
-        boolean isActive = Boolean.parseBoolean(request.getParameter("isActive"));
 
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
 
-        try {
-            Date birthday = new SimpleDateFormat("MM/dd/yyyy").parse(birthdayStr);
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection conn = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/user_app", "root", "C@ndy22802");
+        String name = request.getParameter("name");
+        String ageStr = request.getParameter("age");
+        String birthdayStr = request.getParameter("birthday");
+        boolean isActive = Boolean.parseBoolean(request.getParameter("isActive"));
 
-            //Insert user
+        // ---------------- VALIDATION ----------------
+
+        if (!isValidName(name)) {
+            showError(out, "Name must contain letters only.");
+            return;
+        }
+
+        if (!isValidAge(ageStr)) {
+            showError(out, "Age must be a number between 1 and 150.");
+            return;
+        }
+
+        Date birthday = parseValidDate(birthdayStr);
+        if (birthday == null) {
+            showError(out, "Birthday must be in MM/DD/YYYY format.");
+            return;
+        }
+
+        int age = Integer.parseInt(ageStr);
+
+        // ---------------- DATABASE ----------------
+
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
+            Connection conn = DriverManager.getConnection(
+                    "jdbc:mysql://localhost:3306/user_app",
+                    "root",
+                    "C@ndy22802"
+            );
+
             String sql = "INSERT INTO users (name, age, birthday, isActive) VALUES (?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, name);
@@ -39,40 +63,75 @@ public class SaveUserServlet extends HttpServlet {
             stmt.executeUpdate();
             stmt.close();
 
-            out.println("<h2>✅ User && saved  successfully.</h2>");
+            out.println("<h2 style='color:green'>✅ User saved successfully.</h2>");
 
+            // ---------------- DISPLAY USERS ----------------
 
-            //Fetch all users
             String fetchSql = "SELECT id, name, age, birthday, isActive FROM users";
             PreparedStatement fetchStmt = conn.prepareStatement(fetchSql);
             ResultSet rs = fetchStmt.executeQuery();
 
-            out.println("<h3>📋 Current Users in Database:</h3>");
+            out.println("<h3>📋 Current Users:</h3>");
             out.println("<table border='1'>");
             out.println("<tr><th>ID</th><th>Name</th><th>Age</th><th>Birthday</th><th>Active</th></tr>");
 
             while (rs.next()) {
-                int id = rs.getInt("id");
-                String fetchedName = rs.getString("name");
-                int fetchedAge = rs.getInt("age");
-                Date fetchedBirthday = rs.getDate("birthday");
-                boolean fetchedActive = rs.getBoolean("isActive");
+                out.println("<tr>");
+                out.println("<td>" + rs.getInt("id") + "</td>");
+                out.println("<td>" + rs.getString("name") + "</td>");
+                out.println("<td>" + rs.getInt("age") + "</td>");
+                Date dbBirthday = rs.getDate("birthday");
 
-                String birthdayFormatted = (fetchedBirthday != null)
-                        ? new SimpleDateFormat("MM/dd/yyyy").format(fetchedBirthday)
-                        : "N/A";
+                String formattedBirthday =
+                        (dbBirthday != null)
+                                ? new SimpleDateFormat("MM/dd/yyyy").format(dbBirthday)
+                                : "N/A";
 
-                out.printf("<tr><td>%d</td><td>%s</td><td>%d</td><td>%s</td><td>%s</td></tr>",
-                        id, fetchedName, fetchedAge, birthdayFormatted, fetchedActive);
+                out.println("<td>" + formattedBirthday + "</td>");
+
+                out.println("<td>" + rs.getBoolean("isActive") + "</td>");
+                out.println("</tr>");
             }
+
             out.println("</table>");
+            out.println("<br><a href='index.html'>⬅ Back to form</a>");
 
             rs.close();
             fetchStmt.close();
             conn.close();
 
         } catch (Exception e) {
-            response.getWriter().println("❌ Error: " + e.getMessage());
+            showError(out, "Database error: " + e.getMessage());
+        }
+    }
+
+    // ---------------- HELPER METHODS ----------------
+
+    private void showError(PrintWriter out, String message) {
+        out.println("<h2 style='color:red'>❌ " + message + "</h2>");
+        out.println("<a href='index.html'>⬅ Back to form</a>");
+    }
+
+    private boolean isValidName(String name) {
+        return name != null && name.matches("^[A-Za-z]+$");
+    }
+
+    private boolean isValidAge(String ageStr) {
+        try {
+            int age = Integer.parseInt(ageStr);
+            return age >= 1 && age <= 150;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private Date parseValidDate(String dateStr) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+            sdf.setLenient(false);
+            return sdf.parse(dateStr);
+        } catch (Exception e) {
+            return null;
         }
     }
 }
