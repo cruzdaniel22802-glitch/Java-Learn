@@ -106,31 +106,45 @@
         let valid = true;
 
         const name = document.getElementById("name").value.trim();
-        const age = document.getElementById("age").value;
-        const birthday = document.getElementById("birthday").value;
+        const age = document.getElementById("age").value.trim();
+        const birthday = document.getElementById("birthday").value.trim();
 
-        document.getElementById("nameError").style.display = "none";
-        document.getElementById("ageError").style.display = "none";
-        document.getElementById("birthdayError").style.display = "none";
+        const nameError = document.getElementById("nameError");
+        const ageError = document.getElementById("ageError");
+        const birthdayError = document.getElementById("birthdayError");
 
-        if (name === "") {
-            document.getElementById("nameError").style.display = "block";
+        // Clear old errors
+        nameError.style.display = "none";
+        ageError.style.display = "none";
+        birthdayError.style.display = "none";
+
+        // -------- NAME --------
+        if (!/^[A-Za-z]+$/.test(name)) {
+            nameError.innerHTML = "Name must contain letters only.";
+            nameError.style.display = "block";
             valid = false;
         }
 
-        if (age <= 0) {
-            document.getElementById("ageError").style.display = "block";
+        // -------- AGE --------
+        if (!/^[0-9]+$/.test(age) || age < 1 || age > 150) {
+            ageError.innerHTML = "Age must be between 1 and 150.";
+            ageError.style.display = "block";
             valid = false;
         }
 
-        if (birthday === "") {
-            document.getElementById("birthdayError").style.display = "block";
+        // -------- BIRTHDAY --------
+        const datePattern = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
+
+        if (!datePattern.test(birthday)) {
+            birthdayError.innerHTML = "Use MM/DD/YYYY format.";
+            birthdayError.style.display = "block";
             valid = false;
         }
 
-        return valid;
+        return valid;   // false = prevent submit
     }
 </script>
+
 
 </body>
 </html>
