@@ -10,7 +10,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@WebServlet("/UpdateUserServlet")
+
 public class UpdateUserServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -53,6 +53,8 @@ public class UpdateUserServlet extends HttpServlet {
             stmt.setInt(5, id);
 
             stmt.executeUpdate();
+
+            conn.commit();
 
             stmt.close();
             conn.close();
