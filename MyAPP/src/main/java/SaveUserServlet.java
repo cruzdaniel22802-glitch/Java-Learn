@@ -78,8 +78,8 @@ public class SaveUserServlet extends HttpServlet {
             while (rs.next()) {
                 out.println("<tr>");
                 out.println("<td>" + rs.getInt("id") + "</td>");
-                out.println("<td>" + rs.getString("name") + "</td>");
-                out.println("<td>" + rs.getInt("age") + "</td>");
+                out.println("<td contenteditable='false'>" + rs.getString("name") + "</td>");
+                out.println("<td contenteditable='false'>" + rs.getInt("age") + "</td>");
                 Date dbBirthday = rs.getDate("birthday");
 
                 String formattedBirthday =
@@ -87,13 +87,54 @@ public class SaveUserServlet extends HttpServlet {
                                 ? new SimpleDateFormat("MM/dd/yyyy").format(dbBirthday)
                                 : "N/A";
 
-                out.println("<td>" + formattedBirthday + "</td>");
+                out.println("<td contenteditable='false'>" + formattedBirthday + "</td>");
 
-                out.println("<td>" + rs.getBoolean("isActive") + "</td>");
+                out.println("<td contenteditable='false'>" + rs.getBoolean("isActive") + "</td>");
+
+                out.println("<td>");
+                out.println("<button onclick='editRow(this)'>✏ Edit</button>");
+                out.println("<button onclick='saveRow(this," + rs.getInt("id") + ")' style='display:none'>💾 Save</button>");
+                out.println("</td>");
+
                 out.println("</tr>");
             }
 
             out.println("</table>");
+
+            out.println("""
+<script>
+function editRow(btn) {
+    const row = btn.parentElement.parentElement;
+    const cells = row.querySelectorAll("td[contenteditable]");
+
+    cells.forEach(cell => cell.contentEditable = "true");
+
+    btn.style.display = "none";
+    btn.nextElementSibling.style.display = "inline";
+}
+
+function saveRow(btn, id) {
+    const row = btn.parentElement.parentElement;
+    const cells = row.querySelectorAll("td[contenteditable]");
+
+    const data = {
+        id: id,
+        name: cells[0].innerText.trim(),
+        age: cells[1].innerText.trim(),
+        birthday: cells[2].innerText.trim(),
+        isActive: cells[3].innerText.trim()
+    };
+
+    fetch("UpdateUserServlet", {
+        method: "POST",
+        headers: {"Content-Type": "application/x-www-form-urlencoded"},
+        body: new URLSearchParams(data)
+    }).then(() => location.reload());
+}
+</script>
+""");
+
+
             out.println("<br><a href='index.html'>⬅ Back to form</a>");
 
             rs.close();

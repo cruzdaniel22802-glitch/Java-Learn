@@ -1,11 +1,24 @@
 <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
          version="4.0">
+
     <servlet>
         <servlet-name>SaveUserServlet</servlet-name>
         <servlet-class>main.java.SaveUserServlet</servlet-class>
     </servlet>
+
     <servlet-mapping>
         <servlet-name>SaveUserServlet</servlet-name>
         <url-pattern>/SaveUserServlet</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>UpdateUserServlet</servlet-name>
+        <servlet-class>main.java.UpdateUserServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>UpdateUserServlet</servlet-name>
+        <url-pattern>/UpdateUserServlet</url-pattern>
+    </servlet-mapping>
+
 </web-app>
