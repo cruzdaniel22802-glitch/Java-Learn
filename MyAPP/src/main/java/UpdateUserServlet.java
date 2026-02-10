@@ -1,20 +1,23 @@
 package main.java;
 
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import main.java.util.ResponseUtils;
+import main.java.util.ValidationUtils;
 
 import java.io.IOException;
-import java.sql.*;
-import java.text.SimpleDateFormat;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.util.Date;
-
 
 public class UpdateUserServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+
+        response.setContentType("text/html");
 
         String idStr = request.getParameter("id");
         String name = request.getParameter("name");
@@ -22,15 +25,38 @@ public class UpdateUserServlet extends HttpServlet {
         String birthdayStr = request.getParameter("birthday");
         String isActiveStr = request.getParameter("isActive");
 
+        // ---------- VALIDATION ----------
+
+        if (idStr == null || !idStr.matches("\\d+")) {
+            ResponseUtils.showError(response.getWriter(), "Invalid user ID.");
+            return;
+        }
+
+        if (!ValidationUtils.isValidName(name)) {
+            ResponseUtils.showError(response.getWriter(), "Name must contain letters only.");
+            return;
+        }
+
+        if (!ValidationUtils.isValidAge(ageStr)) {
+            ResponseUtils.showError(response.getWriter(), "Age must be between 1 and 150.");
+            return;
+        }
+
+        Date birthday = ValidationUtils.parseValidDate(birthdayStr);
+        if (birthday == null) {
+            ResponseUtils.showError(response.getWriter(), "Birthday must be MM/DD/YYYY.");
+            return;
+        }
+
+        // ---------- PARSING (SAFE NOW) ----------
+
+        int id = Integer.parseInt(idStr);
+        int age = Integer.parseInt(ageStr);
+        boolean isActive = Boolean.parseBoolean(isActiveStr);
+
+        // ---------- DATABASE ----------
+
         try {
-            int id = Integer.parseInt(idStr);
-            int age = Integer.parseInt(ageStr);
-            boolean isActive = Boolean.parseBoolean(isActiveStr);
-
-            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-            sdf.setLenient(false);
-            Date birthday = sdf.parse(birthdayStr);
-
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             Connection conn = DriverManager.getConnection(
@@ -54,15 +80,13 @@ public class UpdateUserServlet extends HttpServlet {
 
             stmt.executeUpdate();
 
-            conn.commit();
-
             stmt.close();
             conn.close();
 
             response.setStatus(HttpServletResponse.SC_OK);
 
         } catch (Exception e) {
-            response.sendError(500, e.getMessage());
+            ResponseUtils.showDbError(response.getWriter(), e);
         }
     }
 }

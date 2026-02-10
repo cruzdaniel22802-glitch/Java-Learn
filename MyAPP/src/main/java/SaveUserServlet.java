@@ -1,12 +1,19 @@
 package main.java;
 
+import main.java.util.ValidationUtils;
+import main.java.util.ResponseUtils;
+
+
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -25,25 +32,26 @@ public class SaveUserServlet extends HttpServlet {
 
         // ---------------- VALIDATION ----------------
 
-        if (!isValidName(name)) {
-            showError(out, "Name must contain letters only.");
+        if (!ValidationUtils.isValidName(name)) {
+            ResponseUtils.showError(out, "Name must contain letters only.");
             return;
         }
 
-        if (!isValidAge(ageStr)) {
-            showError(out, "Age must be a number between 1 and 150.");
+        if (!ValidationUtils.isValidAge(ageStr)) {
+            ResponseUtils.showError(out, "Age must be a number between 1 and 150.");
             return;
         }
 
-        Date birthday = parseValidDate(birthdayStr);
+        Date birthday = ValidationUtils.parseValidDate(birthdayStr);
         if (birthday == null) {
-            showError(out, "Birthday must be in MM/DD/YYYY format.");
+            ResponseUtils.showError(out, "Birthday must be in MM/DD/YYYY format.");
+
             return;
         }
 
-        int age = Integer.parseInt(ageStr);
 
         // ---------------- DATABASE ----------------
+        int age = Integer.parseInt(ageStr);
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -129,7 +137,14 @@ function saveRow(btn, id) {
         method: "POST",
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: new URLSearchParams(data)
-    }).then(() => location.reload());
+    }).then(res => {
+        if (!res.ok) return res.text().then(t => alert(t));
+        const cells = btn.parentElement.parentElement.querySelectorAll("td[contenteditable]");
+        cells.forEach(c => c.contentEditable = "false");
+        btn.style.display = "none";
+        btn.previousElementSibling.style.display = "inline";
+        });
+                    
 }
 </script>
 """);
@@ -142,37 +157,9 @@ function saveRow(btn, id) {
             conn.close();
 
         } catch (Exception e) {
-            showError(out, "Database error: " + e.getMessage());
+            ResponseUtils.showDbError(out, e);
         }
     }
 
-    // ---------------- HELPER METHODS ----------------
 
-    private void showError(PrintWriter out, String message) {
-        out.println("<h2 style='color:red'>❌ " + message + "</h2>");
-        out.println("<a href='index.html'>⬅ Back to form</a>");
-    }
-
-    private boolean isValidName(String name) {
-        return name != null && name.matches("^[A-Za-z]+$");
-    }
-
-    private boolean isValidAge(String ageStr) {
-        try {
-            int age = Integer.parseInt(ageStr);
-            return age >= 1 && age <= 150;
-        } catch (NumberFormatException e) {
-            return false;
-        }
-    }
-
-    private Date parseValidDate(String dateStr) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
-            sdf.setLenient(false);
-            return sdf.parse(dateStr);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }
