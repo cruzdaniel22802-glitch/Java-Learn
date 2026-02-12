@@ -28,22 +28,26 @@ public class UpdateUserServlet extends HttpServlet {
         // ---------- VALIDATION ----------
 
         if (idStr == null || !idStr.matches("\\d+")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             ResponseUtils.showError(response.getWriter(), "Invalid user ID.");
             return;
         }
 
         if (!ValidationUtils.isValidName(name)) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             ResponseUtils.showError(response.getWriter(), "Name must contain letters only.");
             return;
         }
 
         if (!ValidationUtils.isValidAge(ageStr)) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             ResponseUtils.showError(response.getWriter(), "Age must be between 1 and 150.");
             return;
         }
 
         Date birthday = ValidationUtils.parseValidDate(birthdayStr);
         if (birthday == null) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             ResponseUtils.showError(response.getWriter(), "Birthday must be MM/DD/YYYY.");
             return;
         }
