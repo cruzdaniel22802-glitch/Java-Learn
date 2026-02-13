@@ -21,4 +21,15 @@
         <url-pattern>/UpdateUserServlet</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <servlet-class>main.java.DeleteUserServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DeleteUserServlet</servlet-name>
+        <url-pattern>/deleteUser</url-pattern>
+    </servlet-mapping>
+
+
 </web-app>
