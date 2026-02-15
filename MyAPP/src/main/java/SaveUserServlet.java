@@ -102,7 +102,6 @@ public class SaveUserServlet extends HttpServlet {
                 out.println("<td>");
                 out.println("<button onclick='editRow(this)'>✏ Edit</button>");
                 out.println("<button onclick='saveRow(this," + rs.getInt("id") + ")' style='display:none'>💾 Save</button>");
-                out.println("<button onclick='addRow()'>➕ Add User</button>");
                 out.println("<button onclick='deleteRow(this," + rs.getInt("id") + ")'>🗑 Delete</button>");
                 out.println("</td>");
 
@@ -164,23 +163,6 @@ function deleteRow(btn, id) {
 
         btn.closest("tr").remove();
     });
-}
-
-function addRow() {
-
-    const table = document.querySelector("table");
-    const row = table.insertRow(-1);
-
-    row.innerHTML = `
-        <td>NEW</td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true"></td>
-        <td>
-            <button onclick="saveNewRow(this)">💾 Save</button>
-        </td>
-    `;
 }
 
 </script>
