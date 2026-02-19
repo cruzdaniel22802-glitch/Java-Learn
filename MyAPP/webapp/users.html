@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Users</title>
+</head>
+<body>
+
+<h2>📋 Users Table HTML</h2>
+
+<table border="1" id="usersTable">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Birthday</th>
+        <th>Active</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<br>
+<a href="index.html">➕ Add New User</a>
+
+<script>
+    async function loadUsers() {
+        const res = await fetch("getUsers");
+        const users = await res.json();
+
+        const tbody = document.querySelector("#usersTable tbody");
+        tbody.innerHTML = "";
+
+        users.forEach(user => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${user.id}</td>
+                <td contenteditable="false">${user.name}</td>
+                <td contenteditable="false">${user.age}</td>
+                <td contenteditable="false">${user.birthday}</td>
+                <td contenteditable="false">${user.isActive}</td>
+                <td>
+                    <button onclick="editRow(this)">✏ Edit</button>
+                    <button onclick="saveRow(this, ${user.id})" style="display:none">💾 Save</button>
+                    <button onclick="deleteRow(this, ${user.id})">🗑 Delete</button>
+                </td>
+            `;
+
+            tbody.appendChild(row);
+        });
+    }
+
+    function editRow(btn) {
+        const row = btn.closest("tr");
+        const cells = row.querySelectorAll("td[contenteditable]");
+
+        cells.forEach(cell => cell.contentEditable = "true");
+
+        btn.style.display = "none";
+        btn.nextElementSibling.style.display = "inline";
+    }
+
+    async function saveRow(btn, id) {
+        const row = btn.closest("tr");
+        const cells = row.querySelectorAll("td[contenteditable]");
+
+        const data = {
+            id,
+            name: cells[0].innerText.trim(),
+            age: cells[1].innerText.trim(),
+            birthday: cells[2].innerText.trim(),
+            isActive: cells[3].innerText.trim()
+        };
+
+        const res = await fetch("updateUser", {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: new URLSearchParams(data)
+        });
+
+        if (!res.ok) {
+            alert(await res.text());
+            return;
+        }
+
+        cells.forEach(c => c.contentEditable = "false");
+        btn.style.display = "none";
+        btn.previousElementSibling.style.display = "inline";
+    }
+
+    async function deleteRow(btn, id) {
+        if (!confirm("Delete user?")) return;
+
+        const res = await fetch("deleteUser", {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: new URLSearchParams({ id })
+        });
+
+        if (!res.ok) {
+            alert(await res.text());
+            return;
+        }
+
+        btn.closest("tr").remove();
+    }
+
+    loadUsers();
+</script>
+
+</body>
+</html>

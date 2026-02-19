@@ -31,5 +31,15 @@
         <url-pattern>/deleteUser</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>GetUsersServlet</servlet-name>
+        <servlet-class>main.java.GetUsersServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>GetUsersServlet</servlet-name>
+        <url-pattern>/getUsers</url-pattern>
+    </servlet-mapping>
+
 
 </web-app>
