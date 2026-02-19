@@ -68,7 +68,7 @@ public class SaveUserServlet extends HttpServlet {
             stmt.close();
             conn.close();
 
-            // 🔥 IMPORTANT PART
+            // IMPORTANT PART
             response.sendRedirect("users.html");
 
         } catch (Exception e) {

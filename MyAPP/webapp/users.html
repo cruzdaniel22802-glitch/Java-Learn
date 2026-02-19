@@ -8,88 +8,125 @@
 
 <h2>📋 Users Table HTML</h2>
 
-<table border="1" id="usersTable">
+<table border="1">
     <thead>
     <tr>
+        <th>Select</th>
         <th>ID</th>
         <th>Name</th>
         <th>Age</th>
         <th>Birthday</th>
         <th>Active</th>
-        <th>Actions</th>
     </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="userTableBody">
+    </tbody>
 </table>
+
 
 <br>
 <a href="index.html">➕ Add New User</a>
+<button onclick="enableBulkEdit()">Edit</button>
+<button onclick="saveAll()" id="saveBtn" style="display:none;">Save All</button>
+<button onclick="deleteSelected()">➕ Delete</button>
 
 <script>
     async function loadUsers() {
-        const res = await fetch("getUsers");
-        const users = await res.json();
+    const res = await fetch("getUsers");
+    const users = await res.json(); // <-- this is your JSON array
 
-        const tbody = document.querySelector("#usersTable tbody");
-        tbody.innerHTML = "";
+    const tableBody = document.querySelector("#userTableBody"); // correct ID
+    tableBody.innerHTML = ""; // clear old rows
 
-        users.forEach(user => {
-            const row = document.createElement("tr");
+    users.forEach(user => {
+        const row = document.createElement("tr");
 
-            row.innerHTML = `
-                <td>${user.id}</td>
-                <td contenteditable="false">${user.name}</td>
-                <td contenteditable="false">${user.age}</td>
-                <td contenteditable="false">${user.birthday}</td>
-                <td contenteditable="false">${user.isActive}</td>
-                <td>
-                    <button onclick="editRow(this)">✏ Edit</button>
-                    <button onclick="saveRow(this, ${user.id})" style="display:none">💾 Save</button>
-                    <button onclick="deleteRow(this, ${user.id})">🗑 Delete</button>
-                </td>
-            `;
+        row.innerHTML = `
+            <td><input type="checkbox" class="userCheckbox" value="${user.id}"></td>
+            <td>${user.id}</td>
+            <td>${user.name}</td>
+            <td>${user.age}</td>
+            <td>${user.birthday}</td>
+            <td>${user.isActive}</td>
+        `;
 
-            tbody.appendChild(row);
-        });
-    }
+        tableBody.appendChild(row);
+    });
+}
 
-    function editRow(btn) {
-        const row = btn.closest("tr");
-        const cells = row.querySelectorAll("td[contenteditable]");
 
-        cells.forEach(cell => cell.contentEditable = "true");
+    function enableBulkEdit() {
+        const selected = document.querySelectorAll(".userCheckbox:checked");
 
-        btn.style.display = "none";
-        btn.nextElementSibling.style.display = "inline";
-    }
-
-    async function saveRow(btn, id) {
-        const row = btn.closest("tr");
-        const cells = row.querySelectorAll("td[contenteditable]");
-
-        const data = {
-            id,
-            name: cells[0].innerText.trim(),
-            age: cells[1].innerText.trim(),
-            birthday: cells[2].innerText.trim(),
-            isActive: cells[3].innerText.trim()
-        };
-
-        const res = await fetch("updateUser", {
-            method: "POST",
-            headers: {"Content-Type": "application/x-www-form-urlencoded"},
-            body: new URLSearchParams(data)
-        });
-
-        if (!res.ok) {
-            alert(await res.text());
-            return;
+        if (selected.length === 0) {
+             alert("Select at least one user to edit.");
+             return;
         }
 
-        cells.forEach(c => c.contentEditable = "false");
-        btn.style.display = "none";
-        btn.previousElementSibling.style.display = "inline";
+        selected.forEach(cb => {
+             const row = cb.closest("tr");
+
+             const nameCell = row.children[2];
+             const ageCell = row.children[3];
+             const birthdayCell = row.children[4];
+             const activeCell = row.children[5];
+
+             nameCell.innerHTML =
+                 `<input type="text" value="${nameCell.innerText}">`;
+
+             ageCell.innerHTML =
+                `<input type="number" value="${ageCell.innerText}">`;
+
+             birthdayCell.innerHTML =
+                `<input type="date" value="${formatDateForInput(birthdayCell.innerText)}">`;
+
+            activeCell.innerHTML =
+                `<input type="checkbox" ${activeCell.innerText === "true" ? "checked" : ""}>`;
+        });
+
+        document.getElementById("saveBtn").style.display = "inline";
     }
+
+
+function saveAll() {
+
+    const selected = document.querySelectorAll(".userCheckbox:checked");
+    let usersToUpdate = [];
+
+    selected.forEach(cb => {
+        const row = cb.closest("tr");
+
+        const id = row.children[1].innerText;
+        const name = row.children[2].querySelector("input").value;
+        const age = row.children[3].querySelector("input").value;
+        const birthday = row.children[4].querySelector("input").value;
+        const active = row.children[5].querySelector("input").checked;
+
+        usersToUpdate.push({
+            id: id,
+            name: name,
+            age: age,
+            birthday: birthday,
+            active: active
+        });
+    });
+
+    fetch("updateUsers", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(usersToUpdate)
+    })
+    .then(response => {
+        if (response.ok) {
+            alert("Users updated!");
+            loadUsers();
+            document.getElementById("saveBtn").style.display = "none";
+        }
+    });
+}
+
 
     async function deleteRow(btn, id) {
         if (!confirm("Delete user?")) return;
@@ -106,6 +143,31 @@
         }
 
         btn.closest("tr").remove();
+    }
+
+    function getSelectedUsers() {
+    const checkboxes = document.querySelectorAll(".userCheckbox:checked");
+    return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    function deleteSelected() {
+    const selected = getSelectedUsers();
+
+    if (selected.length === 0) {
+        alert("Please select at least one user to delete.");
+        return;
+    }
+
+    if (!confirm("Are you sure you want to delete selected users?")) {
+        return;
+    }
+
+    fetch("deleteUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "ids=" + selected.join(",")
+    })
+    .then(() => loadUsers());
     }
 
     loadUsers();
