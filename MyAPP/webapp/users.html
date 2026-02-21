@@ -31,146 +31,141 @@
 <button onclick="deleteSelected()">➕ Delete</button>
 
 <script>
+
     async function loadUsers() {
-    const res = await fetch("getUsers");
-    const users = await res.json(); // <-- this is your JSON array
+        const res = await fetch("getUsers");
+        const users = await res.json();
 
-    const tableBody = document.querySelector("#userTableBody"); // correct ID
-    tableBody.innerHTML = ""; // clear old rows
+        const tableBody = document.querySelector("#userTableBody");
+        tableBody.innerHTML = "";
 
-    users.forEach(user => {
-        const row = document.createElement("tr");
+        users.forEach(user => {
+            const row = document.createElement("tr");
 
-        row.innerHTML = `
-            <td><input type="checkbox" class="userCheckbox" value="${user.id}"></td>
-            <td>${user.id}</td>
-            <td>${user.name}</td>
-            <td>${user.age}</td>
-            <td>${user.birthday}</td>
-            <td>${user.isActive}</td>
-        `;
+            row.innerHTML = `
+                <td><input type="checkbox" class="userCheckbox" value="${user.id}"></td>
+                <td>${user.id}</td>
+                <td>${user.name}</td>
+                <td>${user.age}</td>
+                <td>${user.birthday}</td>
+                <td>${user.isActive}</td>
+            `;
 
-        tableBody.appendChild(row);
-    });
-}
+            tableBody.appendChild(row);
+        });
+    }
 
+    function convertToInputDate(dateStr) {
+        if (!dateStr) return "";
+        const parts = dateStr.split("/");
+        if (parts.length !== 3) return "";
+        return `${parts[2]}-${parts[0].padStart(2,"0")}-${parts[1].padStart(2,"0")}`;
+    }
+
+    function convertToDisplayDate(dateStr) {
+        if (!dateStr) return "";
+        const parts = dateStr.split("-");
+        return `${parts[1]}/${parts[2]}/${parts[0]}`;
+    }
 
     function enableBulkEdit() {
         const selected = document.querySelectorAll(".userCheckbox:checked");
 
         if (selected.length === 0) {
-             alert("Select at least one user to edit.");
-             return;
-        }
-
-        selected.forEach(cb => {
-             const row = cb.closest("tr");
-
-             const nameCell = row.children[2];
-             const ageCell = row.children[3];
-             const birthdayCell = row.children[4];
-             const activeCell = row.children[5];
-
-             nameCell.innerHTML =
-                 `<input type="text" value="${nameCell.innerText}">`;
-
-             ageCell.innerHTML =
-                `<input type="number" value="${ageCell.innerText}">`;
-
-             birthdayCell.innerHTML =
-                `<input type="date" value="${formatDateForInput(birthdayCell.innerText)}">`;
-
-            activeCell.innerHTML =
-                `<input type="checkbox" ${activeCell.innerText === "true" ? "checked" : ""}>`;
-        });
-
-        document.getElementById("saveBtn").style.display = "inline";
-    }
-
-
-function saveAll() {
-
-    const selected = document.querySelectorAll(".userCheckbox:checked");
-    let usersToUpdate = [];
-
-    selected.forEach(cb => {
-        const row = cb.closest("tr");
-
-        const id = row.children[1].innerText;
-        const name = row.children[2].querySelector("input").value;
-        const age = row.children[3].querySelector("input").value;
-        const birthday = row.children[4].querySelector("input").value;
-        const active = row.children[5].querySelector("input").checked;
-
-        usersToUpdate.push({
-            id: id,
-            name: name,
-            age: age,
-            birthday: birthday,
-            active: active
-        });
-    });
-
-    fetch("updateUsers", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(usersToUpdate)
-    })
-    .then(response => {
-        if (response.ok) {
-            alert("Users updated!");
-            loadUsers();
-            document.getElementById("saveBtn").style.display = "none";
-        }
-    });
-}
-
-
-    async function deleteRow(btn, id) {
-        if (!confirm("Delete user?")) return;
-
-        const res = await fetch("deleteUser", {
-            method: "POST",
-            headers: {"Content-Type": "application/x-www-form-urlencoded"},
-            body: new URLSearchParams({ id })
-        });
-
-        if (!res.ok) {
-            alert(await res.text());
+            alert("Select at least one user to edit.");
             return;
         }
 
-        btn.closest("tr").remove();
+        selected.forEach(cb => {
+            const row = cb.closest("tr");
+
+            const nameCell = row.children[2];
+            const ageCell = row.children[3];
+            const birthdayCell = row.children[4];
+            const activeCell = row.children[5];
+
+            nameCell.innerHTML =
+                `<input type="text" value="${nameCell.innerText}">`;
+
+            ageCell.innerHTML =
+                `<input type="number" value="${ageCell.innerText}">`;
+
+            birthdayCell.innerHTML =
+                `<input type="date" value="${convertToInputDate(birthdayCell.innerText)}">`;
+
+            const isChecked = activeCell.innerText.trim() === "true";
+            activeCell.innerHTML =
+                `<input type="checkbox" ${isChecked ? "checked" : ""}>`;
+        });
+
+        document.getElementById("saveBtn").style.display = "inline-block";
+    }
+
+    async function saveAll() {
+
+        const selected = document.querySelectorAll(".userCheckbox:checked");
+
+        for (const cb of selected) {
+
+            const row = cb.closest("tr");
+
+            const id = row.children[1].innerText;
+            const name = row.children[2].querySelector("input").value;
+            const age = row.children[3].querySelector("input").value;
+            const birthday = row.children[4].querySelector("input").value;
+            const active = row.children[5].querySelector("input").checked;
+
+            const response = await fetch("/UserFormApp/UpdateUserServlet", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({
+                    id: id,
+                    name: name,
+                    age: age,
+                    birthday: convertToDisplayDate(birthday),
+                    isActive: active
+                })
+            });
+
+            if (!response.ok) {
+                alert("Update failed: " + await response.text());
+                return;
+            }
+        }
+
+        alert("Users updated!");
+        loadUsers();
+        document.getElementById("saveBtn").style.display = "none";
     }
 
     function getSelectedUsers() {
-    const checkboxes = document.querySelectorAll(".userCheckbox:checked");
-    return Array.from(checkboxes).map(cb => cb.value);
+        const checkboxes = document.querySelectorAll(".userCheckbox:checked");
+        return Array.from(checkboxes).map(cb => cb.value);
     }
 
     function deleteSelected() {
-    const selected = getSelectedUsers();
 
-    if (selected.length === 0) {
-        alert("Please select at least one user to delete.");
-        return;
-    }
+        const selected = getSelectedUsers();
 
-    if (!confirm("Are you sure you want to delete selected users?")) {
-        return;
-    }
+        if (selected.length === 0) {
+            alert("Please select at least one user to delete.");
+            return;
+        }
 
-    fetch("deleteUser", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "ids=" + selected.join(",")
-    })
-    .then(() => loadUsers());
+        if (!confirm("Are you sure you want to delete selected users?")) {
+            return;
+        }
+
+        fetch("deleteUser", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: "ids=" + selected.join(",")
+        })
+        .then(() => loadUsers());
     }
 
     loadUsers();
+
 </script>
 
 </body>
