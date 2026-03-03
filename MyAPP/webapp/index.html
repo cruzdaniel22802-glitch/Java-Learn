@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Registration</title>
+    <title>Welcome - User Management</title>
 
     <style>
         body {
@@ -14,7 +14,7 @@
             align-items: center;
         }
 
-        .form-container {
+        .login-container {
             background: white;
             padding: 30px;
             width: 350px;
@@ -33,18 +33,13 @@
             font-weight: bold;
         }
 
-        input, select {
+        input {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
             border-radius: 5px;
             border: 1px solid #ccc;
             font-size: 14px;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: #4a90e2;
         }
 
         button {
@@ -65,86 +60,27 @@
 
         .error {
             color: red;
-            font-size: 13px;
-            display: none;
+            margin-top: 10px;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
 
-<div class="form-container">
-    <h2>User Registration</h2>
+<div class="login-container">
+    <h2>Welcome</h2>
 
-    <form action="SaveUserServlet" method="post" onsubmit="return validateForm()">
+    <form action="LoginServlet" method="post">
+        <label>Username</label>
+        <input type="text" name="username" required>
 
-        <label>Name</label>
-        <input type="text" name="name" id="name" required>
-        <div class="error" id="nameError">Name is required</div>
+        <label>Password</label>
+        <input type="password" name="password" required>
 
-        <label>Age</label>
-        <input type="number" name="age" id="age" min="1" required>
-        <div class="error" id="ageError">Enter a valid age</div>
-
-        <label>Birthday</label>
-        <input type="text" name="birthday" id="birthday" placeholder="MM/DD/YYYY" required>
-        <div class="error" id="birthdayError">Select a date</div>
-
-        <label>Active User?</label>
-        <select name="isActive">
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-        </select>
-
-        <button type="submit">Register User</button>
+        <button type="submit">Login</button>
     </form>
 </div>
-
-<script>
-    function validateForm() {
-
-        let valid = true;
-
-        const name = document.getElementById("name").value.trim();
-        const age = document.getElementById("age").value.trim();
-        const birthday = document.getElementById("birthday").value.trim();
-
-        const nameError = document.getElementById("nameError");
-        const ageError = document.getElementById("ageError");
-        const birthdayError = document.getElementById("birthdayError");
-
-        // Clear old errors
-        nameError.style.display = "none";
-        ageError.style.display = "none";
-        birthdayError.style.display = "none";
-
-        // -------- NAME --------
-        if (!/^[A-Za-z]+$/.test(name)) {
-            nameError.innerHTML = "Name must contain letters only.";
-            nameError.style.display = "block";
-            valid = false;
-        }
-
-        // -------- AGE --------
-        if (!/^[0-9]+$/.test(age) || age < 1 || age > 150) {
-            ageError.innerHTML = "Age must be between 1 and 150.";
-            ageError.style.display = "block";
-            valid = false;
-        }
-
-        // -------- BIRTHDAY --------
-        const datePattern = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/\d{4}$/;
-
-        if (!datePattern.test(birthday)) {
-            birthdayError.innerHTML = "Use MM/DD/YYYY format.";
-            birthdayError.style.display = "block";
-            valid = false;
-        }
-
-        return valid;   // false = prevent submit
-    }
-</script>
-
 
 </body>
 </html>
