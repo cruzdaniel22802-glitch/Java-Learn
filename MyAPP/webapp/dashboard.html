@@ -3,9 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
+
+    <style>
+
+        body{
+            margin:0;
+            font-family: Arial, sans-serif;
+            background:#f4f4f4;
+        }
+
+        /* Top navigation bar */
+        .navbar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            background:#333;
+            color:white;
+            padding:15px 25px;
+        }
+
+        .logout-btn button{
+            padding:8px 14px;
+            background:#e74c3c;
+            border:none;
+            color:white;
+            cursor:pointer;
+            border-radius:4px;
+        }
+
+        /* Center window/card */
+        .container{
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:80vh;
+        }
+
+        .card{
+            background:white;
+            padding:40px;
+            border-radius:8px;
+            box-shadow:0 4px 10px rgba(0,0,0,0.1);
+            text-align:center;
+        }
+
+        .card a{
+            display:inline-block;
+            margin-top:20px;
+            padding:12px 20px;
+            background:#3498db;
+            color:white;
+            text-decoration:none;
+            border-radius:5px;
+        }
+
+    </style>
+
 </head>
+
 <body>
-<h1>Welcome to the Dashboard</h1>
-<a href="UserFormApp">Go to User Table</a>
+
+<div class="navbar">
+
+    <h2>Dashboard</h2>
+
+    <div class="logout-btn">
+        <form action="LogoutServlet" method="get">
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+
+</div>
+
+
+<div class="container">
+
+    <div class="card">
+        <h1>Welcome to the Dashboard</h1>
+        <p>Manage your application users</p>
+
+        <a href="UserFormApp">Go to User Table</a>
+    </div>
+
+</div>
+
 </body>
 </html>
