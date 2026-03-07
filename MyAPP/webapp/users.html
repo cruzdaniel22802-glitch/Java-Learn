@@ -147,24 +147,43 @@
 
     function deleteSelected() {
 
-        const selected = getSelectedUsers();
+    const selected = getSelectedUsers();
 
-        if (selected.length === 0) {
-            alert("Please select at least one user to delete.");
-            return;
-        }
-
-        if (!confirm("Are you sure you want to delete selected users?")) {
-            return;
-        }
-
-        fetch("deleteUser", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "ids=" + selected.join(",")
-        })
-        .then(() => loadUsers());
+    if (selected.length === 0) {
+        alert("Please select at least one user to delete.");
+        return;
     }
+
+    if (!confirm("Are you sure you want to delete selected users?")) {
+        return;
+    }
+
+    fetch("deleteUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "ids=" + selected.join(",")
+    })
+    .then(() => loadUsers());
+}
+
+
+function searchUsers() {
+
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#userTableBody tr");
+
+    rows.forEach(row => {
+
+        const text = row.innerText.toLowerCase();
+
+        if (text.includes(input)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+
+    });
+}
 
     loadUsers();
 
