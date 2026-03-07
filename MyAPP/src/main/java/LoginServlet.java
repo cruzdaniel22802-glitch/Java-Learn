@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.sql.*;
 
 public class LoginServlet extends HttpServlet {
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
 
@@ -13,6 +14,7 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         try {
+
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             Connection conn = DriverManager.getConnection(
@@ -21,30 +23,33 @@ public class LoginServlet extends HttpServlet {
                     "C@ndy22802"
             );
 
-            String sql = "SELECT * FROM accounts WHERE username = ? AND password = ?";
+            String sql = "SELECT * FROM accounts WHERE username=? AND password=?";
             PreparedStatement stmt = conn.prepareStatement(sql);
+
             stmt.setString(1, username);
             stmt.setString(2, password);
 
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                // LOGIN SUCCESS
 
+                // ✅ CREATE SESSION
                 HttpSession session = request.getSession();
-                session.setAttribute("user", username);
+                session.setAttribute("username", username);
 
+                // ✅ redirect to dashboard
                 response.sendRedirect("DashboardServlet");
+
             } else {
-                response.getWriter().println("<h3>Invalid credentials</h3>");
+
+                response.sendRedirect("index.html?error=1");
+
             }
 
-            rs.close();
-            stmt.close();
             conn.close();
 
         } catch (Exception e) {
-            response.getWriter().println("Error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
