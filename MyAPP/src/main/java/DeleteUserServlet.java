@@ -1,8 +1,12 @@
-package main.java;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import util.ConfigLoader;
 
-import jakarta.servlet.http.*;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 
 public class DeleteUserServlet extends HttpServlet {
 
@@ -21,12 +25,12 @@ public class DeleteUserServlet extends HttpServlet {
             String[] ids = idsParam.split(",");
 
             try {
-                Class.forName("com.mysql.cj.jdbc.Driver");
+                Class.forName(ConfigLoader.get("db.driver"));
 
                 Connection conn = DriverManager.getConnection(
-                        "jdbc:mysql://localhost:3306/user_app",
-                        "root",
-                        "C@ndy22802"
+                        ConfigLoader.get("db.url"),
+                        ConfigLoader.get("db.username"),
+                        ConfigLoader.get("db.password")
                 );
 
                 PreparedStatement stmt =

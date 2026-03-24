@@ -1,7 +1,6 @@
-package main.java;
-
-import main.java.util.ValidationUtils;
-import main.java.util.ResponseUtils;
+import util.ConfigLoader;
+import util.ValidationUtils;
+import util.ResponseUtils;
 
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,9 +49,9 @@ public class SaveUserServlet extends HttpServlet {
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             Connection conn = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/user_app",
-                    "root",
-                    "C@ndy22802"
+                    ConfigLoader.get("db.url"),
+                    ConfigLoader.get("db.username"),
+                    ConfigLoader.get("db.password")
             );
 
             String sql = "INSERT INTO users (name, age, birthday, isActive) VALUES (?, ?, ?, ?)";

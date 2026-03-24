@@ -1,9 +1,15 @@
-package main.java;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import util.ConfigLoader;
 
-import jakarta.servlet.http.*;
-import jakarta.servlet.*;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class LoginServlet extends HttpServlet {
 
@@ -18,9 +24,9 @@ public class LoginServlet extends HttpServlet {
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             Connection conn = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/user_app",
-                    "root",
-                    "C@ndy22802"
+                    ConfigLoader.get("db.url"),
+                    ConfigLoader.get("db.username"),
+                    ConfigLoader.get("db.password")
             );
 
             String sql = "SELECT * FROM accounts WHERE username=? AND password=?";

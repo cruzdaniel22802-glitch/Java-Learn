@@ -1,10 +1,9 @@
-package main.java;
-
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import main.java.util.ResponseUtils;
-import main.java.util.ValidationUtils;
+import util.ConfigLoader;
+import util.ResponseUtils;
+import util.ValidationUtils;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -65,9 +64,9 @@ public class UpdateUserServlet extends HttpServlet {
             Class.forName("com.mysql.cj.jdbc.Driver");
 
             Connection conn = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/user_app",
-                    "root",
-                    "C@ndy22802"
+                    ConfigLoader.get("db.url"),
+                    ConfigLoader.get("db.username"),
+                    ConfigLoader.get("db.password")
             );
 
             String sql = """
